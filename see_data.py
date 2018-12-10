@@ -1,7 +1,22 @@
+import sys
+
 import pandas as pd
 from os.path import join, dirname, abspath
+import keras
+from keras.datasets import mnist
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+from keras import backend as K
 
-data_path = join(dirname(dirname(abspath(__file__))), "data")
+try:
+    from atlas_kaggle.settings import data_dir
+except Exception as e:
+    print(e)
+    data_dir = 'data'
+
+
+data_path = join(dirname(dirname(abspath(__file__))), data_dir)
 print(data_path)
 gold_data_path = join(data_path, "train.csv")
 gold_data = pd.read_csv(open(gold_data_path, "r"))
@@ -9,7 +24,8 @@ print(gold_data[:10])
 
 
 # Use convolutional net
-# FROM https://github.com/keras-team/keras/blob/master/examples/mnist_cnn.py (MNIST data)
+# FROM https://github.com/keras-team/keras/blob/master/examples/mnist_cnn.py
+# (MNIST data)
 
 
 '''Trains a simple convnet on the MNIST dataset.
@@ -18,12 +34,6 @@ Gets to 99.25% test accuracy after 12 epochs
 16 seconds per epoch on a GRID K520 GPU.
 '''
 
-import keras
-from keras.datasets import mnist
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras import backend as K
 
 batch_size = 128
 num_classes = 10
