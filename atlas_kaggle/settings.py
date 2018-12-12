@@ -1,1 +1,1 @@
-data_dir = '/Volumes/Kaggle Data/atlas/'
+data_dir = '/Volumes/Kaggle Data/atlas'
