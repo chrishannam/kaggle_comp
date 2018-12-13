@@ -78,6 +78,7 @@ def load_image(basepath, image_id):
     image[1,:,:] = imread(basepath + image_id + "_red" + ".png")
     image[2,:,:] = imread(basepath + image_id + "_blue" + ".png")
     image[3,:,:] = imread(basepath + image_id + "_yellow" + ".png")
+    image.resize((4, 64,64))
     return image
 
 
@@ -93,16 +94,13 @@ def load_train_csv(gold_path):
 
 
 def load_training_dataset(training_csv, training_images_folder, batch_size):
-    all_matrices = np.array([])
+    all_matrices = np.empty(shape=(10, 4, 64, 64))
     img_to_label_df = load_train_csv(training_csv)
     ids = img_to_label_df.Id
     batches = [ids[x:x + batch_size] for x in range(0, ids.size, batch_size)]
-    print(batches[:2])
     for batch in batches[:1]:
-        print("loading images")
         b = load_images(training_images_folder, batch)
-        print(b)
-        all_matrices = np.concatenate(all_matrices, b)
+        all_matrices = np.concatenate((all_matrices, b))
     return all_matrices
 
 
@@ -114,10 +112,8 @@ def main():
     vgg_16 = VGG16()
 
     load_train_csv(f"{data_dir}/train.csv")
-    load_training_dataset(train_csv, train_imgs, 10)
-    pass
-
-
+    load_training_dataset(train_csv, train_imgs, 1)
+    
 
 
 if __name__ == "__main__":
