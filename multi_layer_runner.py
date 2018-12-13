@@ -1,6 +1,7 @@
 import numpy as np
 from keras import Sequential
 from keras.applications.vgg16 import VGG16
+from keras.applications.vgg16 import preprocess_input
 from keras.models import Sequential
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import Conv2D
@@ -47,6 +48,7 @@ class SmallerVGGNet:
         if K.image_data_format() == "channels_first":
             inputShape = (depth, height, width)
             chanDim = 1
+
         # CONV => RELU => POOL
         model.add(Conv2D(32, (3, 3), padding="same",
                          input_shape=inputShape))
@@ -54,6 +56,8 @@ class SmallerVGGNet:
         model.add(BatchNormalization(axis=chanDim))
         model.add(MaxPooling2D(pool_size=(3, 3)))
         model.add(Dropout(0.25))
+        return model
+
 
 def resize(image):
     return image.resize(size=SIZE)
@@ -78,7 +82,7 @@ def load_image(basepath, image_id):
     image[1,:,:] = imread(basepath + image_id + "_red" + ".png")
     image[2,:,:] = imread(basepath + image_id + "_blue" + ".png")
     image[3,:,:] = imread(basepath + image_id + "_yellow" + ".png")
-    image.resize((4, 64,64))
+    image.resize((4, 64, 64))
     return image
 
 
@@ -101,7 +105,7 @@ def load_training_dataset(training_csv, training_images_folder, batch_size):
     for batch in batches[:1]:
         b = load_images(training_images_folder, batch)
         all_matrices = np.concatenate((all_matrices, b))
-    return all_matrices
+    return all_matrices, ids[:1]
 
 
 def main():
@@ -109,11 +113,23 @@ def main():
     train_imgs = f"{data_dir}/train/"
     test_imgs = f"{data_dir}/test"
     sample_submission = f"{data_dir}/sample_submission.csv"
-    vgg_16 = VGG16()
+
+    # model = VGG16(include_top=False, input_shape=(4, 64, 64))
 
     load_train_csv(f"{data_dir}/train.csv")
-    load_training_dataset(train_csv, train_imgs, 1)
-    
+    training_set, ids = load_training_dataset(train_csv, train_imgs, 1)
+
+    model = SmallerVGGNet.build(
+        64, 64, 4, ids
+    )
+    # img = image.load_img(img_path, target_size=(224, 224))
+    # x = image.img_to_array(img)
+
+    #for x in training_set:
+        # x = np.expand_dims(x, axis=0)
+    # x = preprocess_input()
+    features = model.predict(training_set[0])
+    print(features)
 
 
 if __name__ == "__main__":
